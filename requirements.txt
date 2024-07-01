@@ -1,10 +1,10 @@
-crewai==0.4.2  # Assurez-vous d'utiliser la version la plus récente ou compatible
-streamlit==1.25.0  # Assurez-vous d'utiliser la version la plus récente ou compatible
-langchain-openai==0.0.151  # Assurez-vous d'utiliser la version la plus récente ou compatible
-langchain-groq==0.0.4  # Assurez-vous d'utiliser la version la plus récente ou compatible
-langchain==0.0.151  # Assurez-vous d'utiliser la version la plus récente ou compatible
-langchain-community==0.0.21  # Assurez-vous d'utiliser la version la plus récente ou compatible
-mysql-connector-python==8.0.34  # Assurez-vous d'utiliser la version la plus récente ou compatible
-pyodbc==4.0.35  # Assurez-vous d'utiliser la version la plus récente ou compatible
-python-dotenv==1.0.0  # Assurez-vous d'utiliser la version la plus récente ou compatible
-embedchain==0.0.4  # Ajoutez embedchain et assurez-vous d'utiliser la version la plus récente ou compatible
+crewai
+streamlit
+langchain-openai
+langchain-groq
+langchain
+langchain-community
+mysql-connector-python
+pyodbc
+python-dotenv
+embedchain
