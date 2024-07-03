@@ -10,25 +10,70 @@ warnings.filterwarnings('ignore')
 load_dotenv()
 
 # Fonction de connexion
-def login(email, password):
+def login(username, password):
     # Remplacez ceci par la vérification réelle des identifiants
-    if email == "top2.wetic@gmail.com" and password == "dap.gmd8cnp_RXE@yvh":
+    if username == "admin" and password == "aze123":
         return True
     return False
 
 # Fonction pour afficher la page de connexion
 def show_login_page():
-    st.title("Page de Connexion")
-    email = st.text_input("Email")
-    password = st.text_input("Mot de passe", type="password")
-    login_button = st.button("Se connecter")
+    st.set_page_config(page_title="Connexion - Blog Post Writer", page_icon=":lock:", layout="centered")
+    
+    st.markdown("""
+        <style>
+        .login-container {
+            background-color: #f4f4f9;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .login-title {
+            color: #4CAF50;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .login-input {
+            margin-bottom: 1rem;
+        }
+        .login-button {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+        .login-button:hover {
+            background-color: #45a049;
+        }
+        .footer-text {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #888;
+            text-align: center;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
+    st.markdown('<h2 class="login-title">Connexion</h2>', unsafe_allow_html=True)
+
+    username = st.text_input("Username", className="login-input")
+    password = st.text_input("Password", type="password", className="login-input")
+    login_button = st.button("Se connecter", key="login_button", help="Cliquez pour vous connecter", className="login-button")
 
     if login_button:
-        if login(email, password):
+        if login(username, password):
             st.session_state.logged_in = True
             st.experimental_rerun()
         else:
             st.error("Identifiants incorrects. Veuillez réessayer.")
+
+    st.markdown('<div class="footer-text">Développé par DIGITAR</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Fonction pour afficher la page principale
 def show_main_page():
@@ -156,72 +201,38 @@ def show_main_page():
                 "1. Utiliser le plan de contenu pour rédiger un article de blog convaincant sur le sujet {topic}.\n"
                 "2. Incorporer naturellement les mots-clés SEO.\n"
                 "3. Les sections/Sous-titres sont correctement nommés de manière engageante.\n"
-                "4. S'assurer que l'article est structuré avec une introduction engageante, un corps perspicace et une conclusion récapitulative.\n"
-                "5. Relire pour les erreurs grammaticales et l'alignement avec la voix de la marque."
+                "4. Écrire un article de blog complet avec une introduction, un corps et une conclusion."
             ),
-            expected_output="Un article de blog bien écrit au format markdown, prêt pour la publication, chaque section doit avoir 2 ou 3 paragraphes.",
+            expected_output="Un article de blog complet avec introduction, corps et conclusion.",
             agent=writer
         )
 
         edit = Task(
-            description=("Relire l'article de blog donné pour les erreurs grammaticales et l'alignement avec la voix de la marque."),
-            expected_output="Un article de blog bien écrit au format markdown, prêt pour la publication, chaque section doit avoir 2 ou 3 paragraphes.",
+            description=(
+                "1. Revoir et affiner l'article de blog fourni par le Rédacteur de Contenu.\n"
+                "2. Assurer l'exactitude des informations, l'engagement du contenu et l'adéquation avec le style de l'organisation.\n"
+                "3. Rechercher des informations supplémentaires si nécessaire pour améliorer le contenu.\n"
+                "4. Éviter les controverses majeures et garantir un ton équilibré."
+            ),
+            expected_output="Une version révisée de l'article de blog prête pour publication.",
             agent=editor
         )
 
-        crew = Crew(
-            agents=[planner, writer, editor],
-            tasks=[plan, write, edit],
-            verbose=2
-        )
+        # Affichage des tâches
+        st.header("Planifier, Écrire et Éditer un Article de Blog")
+        st.subheader(f"Sujet : {topic}")
 
-        # Lancer le workflow
-        workflow_started = st.button("Démarrer le workflow")
+        st.write("### Étape 1: Planification")
+        st.write(plan.description.format(topic=topic))
 
-        if workflow_started:
-            try:
-                with st.spinner("Exécution du workflow..."):
-                    crew_response = crew.kickoff(inputs={"topic": topic})
-                st.markdown(f"### Résultat du workflow pour le sujet : {topic}")
-                st.write(crew_response)
-                
-                # Ajouter un champ de texte pour afficher et copier le blog post
-                st.text_area("Article de blog généré :", value=crew_response, height=300)
-                
-            except Exception as e:
-                st.error("Une erreur est survenue lors de l'exécution du workflow. Veuillez vérifier votre clé API et réessayer.")
-                st.error(f"Erreur : {str(e)}")
-    else:
-        st.warning("Veuillez valider la configuration avant de démarrer le workflow.")
+        st.write("### Étape 2: Rédaction")
+        st.write(write.description.format(topic=topic))
 
-    st.markdown("---")
+        st.write("### Étape 3: Édition")
+        st.write(edit.description.format(topic=topic))
 
-    st.markdown("## Agents et leurs rôles :")
-    st.markdown("""
-    1. **Planificateur de Contenu** : Planifie un contenu engageant et factuellement précis.
-    2. **Rédacteur de Contenu** : Rédige des articles d'opinion perspicaces et factuellement précis.
-    3. **Éditeur** : Édite l'article de blog pour l'aligner avec le style rédactionnel de l'organisation.
-    """)
-
-    st.markdown("## Tâches à effectuer :")
-    st.markdown("""
-    1. **Planification de Contenu** : Prioriser les tendances, identifier le public, développer le plan et inclure des mots-clés SEO.
-    2. **Rédaction** : Utiliser le plan pour rédiger un article de blog convaincant, incorporer des mots-clés SEO et assurer une structure appropriée.
-    3. **Édition** : Relire l'article de blog pour les erreurs grammaticales et l'alignement avec la voix de la marque.
-    """)
-
-    # Ajouter un bouton pour se déconnecter
-    logout_button = st.button("Se déconnecter")
-    if logout_button:
-        st.session_state.logged_in = False
-        st.experimental_rerun()
-
-# Vérifiez si l'utilisateur est connecté
+# Vérifiez si l'utilisateur est connecté, sinon afficher la page de connexion
 if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-if st.session_state.logged_in:
-    show_main_page()
-else:
     show_login_page()
-
+else:
+    show_main_page()
