@@ -69,13 +69,13 @@ def show_login_page():
     st.markdown('<h2 class="login-title">Connexion</h2>', unsafe_allow_html=True)
 
     # Champ de nom d'utilisateur
-    username = st.text_input("Username", key="username", placeholder="Entrez votre nom d'utilisateur", label_visibility="collapsed")
-    
+    username = st.text_input("Username", key="username", help="Entrez votre nom d'utilisateur", placeholder="admin")
+
     # Champ de mot de passe
-    password = st.text_input("Password", type="password", key="password", placeholder="Entrez votre mot de passe", label_visibility="collapsed")
-    
+    password = st.text_input("Password", type="password", key="password", help="Entrez votre mot de passe", placeholder="aze123")
+
     # Bouton de connexion
-    if st.button("Se connecter", key="login_button", help="Cliquez pour vous connecter", css_class="login-button"):
+    if st.button("Se connecter", key="login_button"):
         if login(username, password):
             st.session_state.logged_in = True
             st.experimental_rerun()
@@ -87,28 +87,25 @@ def show_login_page():
 
 # Fonction pour afficher la page principale
 def show_main_page():
-    # Configuration de la page
     st.set_page_config(page_title="DIGITAR Blog Post Writer", page_icon="📝", layout="centered")
     
     st.markdown("""
-    <style>
-        .stApp {
-            background-color: #2E3B4E;
-            color: white;
-        }
-        .main {
+        <style>
+        .main-container {
             background-color: #2E3B4E;
             color: white;
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            margin: 0 auto;
         }
-        .title {
+        .main-title {
             font-size: 2.5rem;
             color: #FFD700;
             text-align: center;
         }
-        .description {
+        .main-description {
             font-size: 1.2rem;
             color: #FFD700;
             text-align: center;
@@ -126,16 +123,22 @@ def show_main_page():
             font-size: 1rem;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%;
         }
         .stButton button:hover {
             background-color: #FFC700;
         }
-    </style>
-    """, unsafe_allow_html=True)
+        .footer-text {
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            color: #888;
+            text-align: center;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-    st.markdown('<div class="title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
-    st.markdown('<div class="description">Cette application vous guide à travers le processus de planification, rédaction et édition d\'un article de blog sur un sujet spécifié.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-description">Cette application vous guide à travers le processus de planification, rédaction et édition d\'un article de blog sur un sujet spécifié.</div>', unsafe_allow_html=True)
 
     # Section de la barre latérale pour la clé de l'API et le modèle de langage
     st.sidebar.title("Configuration")
@@ -167,7 +170,7 @@ def show_main_page():
         # Entrée pour le sujet
         topic = st.text_input("Entrez le sujet pour l'article de blog:", "Intelligence Artificielle", key="input-text")
 
-        # Définir les agents et les tâches
+        # Définir les agents
         planner = Agent(
             role="Planificateur de Contenu",
             goal="Planifier un contenu engageant et factuellement précis sur le sujet {topic}",
@@ -200,42 +203,48 @@ def show_main_page():
             description=(
                 "1. Prioriser les dernières tendances, les acteurs clés et les actualités notables sur le sujet {topic}.\n"
                 "2. Identifier le public cible, en tenant compte de ses intérêts et de ses points de douleur.\n"
-                "3. Développer un plan de contenu structuré pour un article de blog engageant et informatif."
+                "3. Développer un plan de contenu détaillé comprenant une introduction, des points clés et une conclusion.\n"
+                "4. Créer un cadre pour l'article qui guide le rédacteur dans le processus de création de contenu."
             ),
-            tools=[planner],
+            agent=planner,
+            parameters={'topic': topic},
         )
 
-        write = Task(
+        draft = Task(
             description=(
-                "1. Rédiger un article captivant en suivant le plan fourni par le Planificateur de Contenu.\n"
-                "2. Fournir un contenu engageant et informatif, en exprimant des opinions et des arguments clairs.\n"
-                "3. Réviser le texte pour assurer clarté, cohérence et alignement avec les normes rédactionnelles."
+                "En utilisant le plan fourni par le Planificateur de Contenu, rédigez un premier brouillon pour un article de blog sur le sujet {topic}.\n"
+                "Assurez-vous que le contenu est bien structuré, engageant et informatif."
             ),
-            tools=[writer],
+            agent=writer,
+            parameters={'topic': topic},
         )
 
-        edit = Task(
+        review = Task(
             description=(
-                "1. Éditer l'article en termes de style, de ton, et de cohérence avec les directives de l'organisation.\n"
-                "2. Vérifier les faits et corriger les erreurs grammaticales et typographiques.\n"
-                "3. S'assurer que l'article est prêt pour la publication."
+                "Revoyez le brouillon de l'article de blog fourni par le Rédacteur de Contenu. Assurez-vous qu'il est exempt de fautes d'orthographe et de grammaire, qu'il est bien structuré et qu'il répond aux exigences de l'organisation en matière de contenu.\n"
+                "Faites des suggestions d'amélioration et assurez-vous que le contenu est précis, équilibré et objectif."
             ),
-            tools=[editor],
+            agent=editor,
+            parameters={'topic': topic},
         )
 
-        # Créer une instance de Crew
-        crew = Crew([plan, write, edit])
+        # Instancier Crew et ajouter des tâches
+        crew = Crew(
+            name="Blog Post Writer Crew",
+            tasks=[plan, draft, review]
+        )
 
-        if st.button("Démarrer le Workflow", key="start_workflow"):
-            result = crew.run(
-                topic=topic,
-                planner=planner,
-                writer=writer,
-                editor=editor,
-            )
-            st.write(result)
+        st.markdown('<div class="main-title">Démarrer le Workflow</div>', unsafe_allow_html=True)
+        st.markdown('<div class="main-description">Cliquez sur le bouton ci-dessous pour commencer le processus de création de contenu pour votre article de blog.</div>', unsafe_allow_html=True)
+
+        if st.button("Démarrer le workflow"):
+            crew.run()
+
     else:
-        st.write("Veuillez valider la configuration de l'API et du modèle de langage dans la barre latérale.")
+        st.error("Veuillez valider la configuration avant de démarrer le workflow.")
+
+    st.markdown('<div class="footer-text">Développé par DIGITAR</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Page de connexion ou page principale
 if 'logged_in' not in st.session_state:
