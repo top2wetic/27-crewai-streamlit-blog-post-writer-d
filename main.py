@@ -11,89 +11,63 @@ load_dotenv()
 
 # Fonction de connexion
 def login(username, password):
-    # Remplacez ces valeurs par les informations d'identification correctes
+    # Remplacez ceci par une vérification réelle des identifiants
     if username == "admin" and password == "aze123":
         return True
     return False
 
 # Fonction pour afficher la page de connexion
 def show_login_page():
-    # Configuration de la page
-    st.set_page_config(page_title="Page de Connexion - DIGITAR BLOG POST WRITER", page_icon="📝", layout="centered")
-    st.title("Page de Connexion")
+    st.set_page_config(page_title="Login - DIGITAR Blog Post Writer", page_icon=":lock:", layout="centered")
+    st.title("Login to DIGITAR Blog Post Writer")
 
-    # CSS pour styliser la page de connexion
     st.markdown("""
-    <style>
-        .stApp {
-            background-color: #2E3B4E;
-            color: white;
+        <style>
+        .login-title {
+            color: #4CAF50;
+            text-align: center;
         }
-        .main {
-            background-color: #2E3B4E;
-            color: white;
+        .login-container {
+            background-color: #f4f4f9;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             max-width: 400px;
             margin: 0 auto;
         }
-        .title {
-            font-size: 2.5rem;
-            color: #FFD700;
+        .login-button {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+        }
+        .footer-text {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #888;
             text-align: center;
         }
-        .description {
-            font-size: 1.2rem;
-            color: #FFD700;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .input-text {
-            background-color: #1F2937;
-            color: white;
-            border-radius: 5px;
-        }
-        .stButton button {
-            background-color: green;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .stButton button:hover {
-            background-color: #FFC700;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+        </style>
+        """, unsafe_allow_html=True)
 
-    # Conteneur principal de la page de connexion
-    with st.container():
-        st.markdown('<div class="main">', unsafe_allow_html=True)
-        st.markdown('<div class="title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
-        st.markdown('<div class="description">Veuillez vous connecter pour accéder à l\'application.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
 
-        # Formulaire de connexion
-        with st.form(key='login_form'):
-            username = st.text_input("Nom d'utilisateur", type="text", key="login_username", placeholder="Entrez votre nom d'utilisateur", help="Entrez votre nom d'utilisateur")
-            password = st.text_input("Mot de passe", type="password", key="login_password", placeholder="Entrez votre mot de passe", help="Entrez votre mot de passe")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    login_button = st.button("Login", key="login_button", help="Click to log in")
 
-            # Bouton de connexion
-            login_button = st.form_submit_button("Se connecter")
+    if login_button:
+        if login(username, password):
+            st.session_state.logged_in = True
+            st.experimental_rerun()
+        else:
+            st.error("Incorrect credentials. Please try again.")
 
-            if login_button:
-                if login(username, password):
-                    st.session_state.logged_in = True
-                    st.experimental_rerun()
-                else:
-                    st.error("Identifiants incorrects. Veuillez réessayer.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer-text">Developed by DIGITAR</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Fonction pour afficher la page principale
 def show_main_page():
+    st.set_page_config(page_title="DIGITAR Blog Post Writer", page_icon="📝", layout="centered")
     st.title("DIGITAR BLOG POST WRITER")
     st.markdown("""
     <style>
@@ -224,57 +198,40 @@ def show_main_page():
         )
 
         edit = Task(
-            description=("Relire l'article de blog donné pour les erreurs grammaticales et l'alignement avec la voix de la marque."),
-            expected_output="Un article de blog bien écrit au format markdown, prêt pour la publication, chaque section doit avoir 2 ou 3 paragraphes.",
+            description=(
+                "1. Revoir et éditer l'article de blog pour qu'il soit poli et cohérent.\n"
+                "2. Vérifier l'orthographe et la grammaire.\n"
+                "3. S'assurer que le style d'écriture est en accord avec le ton et les objectifs de l'organisation.\n"
+                "4. Proposer des modifications pour améliorer la clarté, la concision et l'impact global de l'article."
+            ),
+            expected_output="Un article de blog édité, avec des corrections, des suggestions et des améliorations.",
             agent=editor
         )
 
-        crew = Crew(
-            agents=[planner, writer, editor],
-            tasks=[plan, write, edit],
-            verbose=2
-        )
+        # Demander au Planificateur de Contenu de créer un plan pour l'article
+        plan_result = planner.do_task(plan, topic=topic)
+        st.write("Plan du contenu :")
+        st.write(plan_result)
 
-        # Lancer le workflow
-        workflow_started = st.button("Démarrer le workflow")
+        # Demander au Rédacteur de Contenu de rédiger l'article en utilisant le plan
+        write_result = writer.do_task(write, topic=topic)
+        st.write("Article rédigé :")
+        st.write(write_result)
 
-        if workflow_started:
-            try:
-                with st.spinner("Exécution du workflow..."):
-                    crew_response = crew.kickoff(inputs={"topic": topic})
-                st.markdown(f"### Résultat du workflow pour le sujet : {topic}")
-                st.markdown(crew_response)
-                
-                # Ajouter un champ de texte pour afficher et copier le blog post
-                st.text_area("Article de blog généré :", value=crew_response, height=300)
-                
-            except Exception as e:
-                st.error("Une erreur est survenue lors de l'exécution du workflow. Veuillez vérifier votre clé API et réessayer.")
-                st.error(f"Erreur : {str(e)}")
+        # Demander à l'Éditeur de réviser l'article
+        edit_result = editor.do_task(edit, topic=topic)
+        st.write("Article édité :")
+        st.write(edit_result)
+
+# Logiciel principal
+def main():
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+
+    if st.session_state.logged_in:
+        show_main_page()
     else:
-        st.warning("Veuillez valider la configuration avant de démarrer le workflow.")
+        show_login_page()
 
-    st.markdown("---")
-
-    st.markdown("## Agents et leurs rôles :")
-    st.markdown("""
-    1. **Planificateur de Contenu** : Planifie un contenu engageant et factuellement précis.
-    2. **Rédacteur de Contenu** : Rédige des articles d'opinion perspicaces et factuellement précis.
-    3. **Éditeur** : Édite l'article de blog pour l'aligner avec le style rédactionnel de l'organisation.
-    """)
-
-    st.markdown("## Tâches à effectuer :")
-    st.markdown("""
-    1. **Planification de Contenu** : Prioriser les tendances, identifier le public, développer le plan et inclure des mots-clés SEO.
-    2. **Rédaction** : Utiliser le plan pour rédiger un article de blog convaincant, incorporer des mots-clés SEO et assurer une structure appropriée.
-    3. **Édition** : Relire l'article de blog pour les erreurs grammaticales et l'alignement avec la voix de la marque.
-    """)
-
-# Définir la logique de l'application
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-if st.session_state.logged_in:
-    show_main_page()
-else:
-    show_login_page()
+if __name__ == "__main__":
+    main()
