@@ -183,7 +183,7 @@ def show_main_page():
                 with st.spinner("Exécution du workflow..."):
                     crew_response = crew.kickoff(inputs={"topic": topic})
                 st.markdown(f"### Résultat du workflow pour le sujet : {topic}")
-                st.markdown(crew_response)
+                st.write(crew_response)
                 
                 # Ajouter un champ de texte pour afficher et copier le blog post
                 st.text_area("Article de blog généré :", value=crew_response, height=300)
