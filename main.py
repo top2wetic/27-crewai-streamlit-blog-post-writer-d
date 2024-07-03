@@ -11,101 +11,109 @@ load_dotenv()
 
 # Fonction de connexion
 def login(username, password):
-    # Remplacez ceci par la vérification réelle des identifiants
+    # Remplacez ces valeurs par les informations d'identification correctes
     if username == "admin" and password == "aze123":
         return True
     return False
 
 # Fonction pour afficher la page de connexion
 def show_login_page():
-    st.set_page_config(page_title="Connexion - Blog Post Writer", page_icon=":lock:", layout="centered")
-    
+    # Configuration de la page
+    st.set_page_config(page_title="Page de Connexion - DIGITAR BLOG POST WRITER", page_icon="📝", layout="centered")
+    st.title("Page de Connexion")
+
+    # CSS pour styliser la page de connexion
     st.markdown("""
-        <style>
-        .login-container {
-            background-color: #f4f4f9;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .login-title {
-            color: #4CAF50;
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        .login-input {
-            margin-bottom: 1rem;
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .login-button {
-            background-color: #4CAF50;
+    <style>
+        .stApp {
+            background-color: #2E3B4E;
             color: white;
-            border-radius: 4px;
-            padding: 0.5rem;
-            font-size: 1rem;
-            width: 100%;
-            cursor: pointer;
         }
-        .login-button:hover {
-            background-color: #45a049;
-        }
-        .footer-text {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            color: #888;
-            text-align: center;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown('<h2 class="login-title">Connexion</h2>', unsafe_allow_html=True)
-
-    # Champ de nom d'utilisateur
-    username = st.text_input("Username", key="username", help="Entrez votre nom d'utilisateur", placeholder="admin")
-
-    # Champ de mot de passe
-    password = st.text_input("Password", type="password", key="password", help="Entrez votre mot de passe", placeholder="aze123")
-
-    # Bouton de connexion
-    if st.button("Se connecter", key="login_button"):
-        if login(username, password):
-            st.session_state.logged_in = True
-            st.experimental_rerun()
-        else:
-            st.error("Identifiants incorrects. Veuillez réessayer.")
-
-    st.markdown('<div class="footer-text">Développé par DIGITAR</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Fonction pour afficher la page principale
-def show_main_page():
-    st.set_page_config(page_title="DIGITAR Blog Post Writer", page_icon="📝", layout="centered")
-    
-    st.markdown("""
-        <style>
-        .main-container {
+        .main {
             background-color: #2E3B4E;
             color: white;
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
+            max-width: 400px;
             margin: 0 auto;
         }
-        .main-title {
+        .title {
             font-size: 2.5rem;
             color: #FFD700;
             text-align: center;
         }
-        .main-description {
+        .description {
+            font-size: 1.2rem;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .input-text {
+            background-color: #1F2937;
+            color: white;
+            border-radius: 5px;
+        }
+        .stButton button {
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .stButton button:hover {
+            background-color: #FFC700;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Conteneur principal de la page de connexion
+    with st.container():
+        st.markdown('<div class="main">', unsafe_allow_html=True)
+        st.markdown('<div class="title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
+        st.markdown('<div class="description">Veuillez vous connecter pour accéder à l\'application.</div>', unsafe_allow_html=True)
+
+        # Formulaire de connexion
+        with st.form(key='login_form'):
+            username = st.text_input("Nom d'utilisateur", type="text", key="login_username", placeholder="Entrez votre nom d'utilisateur", help="Entrez votre nom d'utilisateur")
+            password = st.text_input("Mot de passe", type="password", key="login_password", placeholder="Entrez votre mot de passe", help="Entrez votre mot de passe")
+
+            # Bouton de connexion
+            login_button = st.form_submit_button("Se connecter")
+
+            if login_button:
+                if login(username, password):
+                    st.session_state.logged_in = True
+                    st.experimental_rerun()
+                else:
+                    st.error("Identifiants incorrects. Veuillez réessayer.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# Fonction pour afficher la page principale
+def show_main_page():
+    st.title("DIGITAR BLOG POST WRITER")
+    st.markdown("""
+    <style>
+        .stApp {
+            background-color: #2E3B4E;
+            color: white;
+        }
+        .main {
+            background-color: #2E3B4E;
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .title {
+            font-size: 2.5rem;
+            color: #FFD700;
+            text-align: center;
+        }
+        .description {
             font-size: 1.2rem;
             color: #FFD700;
             text-align: center;
@@ -127,18 +135,11 @@ def show_main_page():
         .stButton button:hover {
             background-color: #FFC700;
         }
-        .footer-text {
-            margin-top: 2rem;
-            font-size: 0.875rem;
-            color: #888;
-            text-align: center;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
-    st.markdown('<div class="main-container">', unsafe_allow_html=True)
-    st.markdown('<div class="main-title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
-    st.markdown('<div class="main-description">Cette application vous guide à travers le processus de planification, rédaction et édition d\'un article de blog sur un sujet spécifié.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="title">DIGITAR BLOG POST WRITER</div>', unsafe_allow_html=True)
+    st.markdown('<div class="description">Cette application vous guide à travers le processus de planification, rédaction et édition d\'un article de blog sur un sujet spécifié.</div>', unsafe_allow_html=True)
 
     # Section de la barre latérale pour la clé de l'API et le modèle de langage
     st.sidebar.title("Configuration")
@@ -203,50 +204,73 @@ def show_main_page():
             description=(
                 "1. Prioriser les dernières tendances, les acteurs clés et les actualités notables sur le sujet {topic}.\n"
                 "2. Identifier le public cible, en tenant compte de ses intérêts et de ses points de douleur.\n"
-                "3. Développer un plan de contenu détaillé comprenant une introduction, des points clés et une conclusion.\n"
-                "4. Créer un cadre pour l'article qui guide le rédacteur dans le processus de création de contenu."
+                "3. Développer un plan de contenu détaillé comprenant une introduction, des points clés et un appel à l'action.\n"
+                "4. Inclure des mots-clés SEO et des données ou sources pertinentes."
             ),
-            agent=planner,
-            parameters={'topic': topic},
+            expected_output="Un document de plan de contenu complet avec un plan, une analyse du public, des mots-clés SEO et des ressources.",
+            agent=planner
         )
 
-        draft = Task(
+        write = Task(
             description=(
-                "En utilisant le plan fourni par le Planificateur de Contenu, rédigez un premier brouillon pour un article de blog sur le sujet {topic}.\n"
-                "Assurez-vous que le contenu est bien structuré, engageant et informatif."
+                "1. Utiliser le plan de contenu pour rédiger un article de blog convaincant sur le sujet {topic}.\n"
+                "2. Incorporer naturellement les mots-clés SEO.\n"
+                "3. Les sections/Sous-titres sont correctement nommés de manière engageante.\n"
+                "4. S'assurer que l'article est structuré avec une introduction engageante, un corps perspicace et une conclusion récapitulative.\n"
+                "5. Relire pour les erreurs grammaticales et l'alignement avec la voix de la marque."
             ),
-            agent=writer,
-            parameters={'topic': topic},
+            expected_output="Un article de blog bien écrit au format markdown, prêt pour la publication, chaque section doit avoir 2 ou 3 paragraphes.",
+            agent=writer
         )
 
-        review = Task(
-            description=(
-                "Revoyez le brouillon de l'article de blog fourni par le Rédacteur de Contenu. Assurez-vous qu'il est exempt de fautes d'orthographe et de grammaire, qu'il est bien structuré et qu'il répond aux exigences de l'organisation en matière de contenu.\n"
-                "Faites des suggestions d'amélioration et assurez-vous que le contenu est précis, équilibré et objectif."
-            ),
-            agent=editor,
-            parameters={'topic': topic},
+        edit = Task(
+            description=("Relire l'article de blog donné pour les erreurs grammaticales et l'alignement avec la voix de la marque."),
+            expected_output="Un article de blog bien écrit au format markdown, prêt pour la publication, chaque section doit avoir 2 ou 3 paragraphes.",
+            agent=editor
         )
 
-        # Instancier Crew et ajouter des tâches
         crew = Crew(
-            name="Blog Post Writer Crew",
-            tasks=[plan, draft, review]
+            agents=[planner, writer, editor],
+            tasks=[plan, write, edit],
+            verbose=2
         )
 
-        st.markdown('<div class="main-title">Démarrer le Workflow</div>', unsafe_allow_html=True)
-        st.markdown('<div class="main-description">Cliquez sur le bouton ci-dessous pour commencer le processus de création de contenu pour votre article de blog.</div>', unsafe_allow_html=True)
+        # Lancer le workflow
+        workflow_started = st.button("Démarrer le workflow")
 
-        if st.button("Démarrer le workflow"):
-            crew.run()
-
+        if workflow_started:
+            try:
+                with st.spinner("Exécution du workflow..."):
+                    crew_response = crew.kickoff(inputs={"topic": topic})
+                st.markdown(f"### Résultat du workflow pour le sujet : {topic}")
+                st.markdown(crew_response)
+                
+                # Ajouter un champ de texte pour afficher et copier le blog post
+                st.text_area("Article de blog généré :", value=crew_response, height=300)
+                
+            except Exception as e:
+                st.error("Une erreur est survenue lors de l'exécution du workflow. Veuillez vérifier votre clé API et réessayer.")
+                st.error(f"Erreur : {str(e)}")
     else:
-        st.error("Veuillez valider la configuration avant de démarrer le workflow.")
+        st.warning("Veuillez valider la configuration avant de démarrer le workflow.")
 
-    st.markdown('<div class="footer-text">Développé par DIGITAR</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("---")
 
-# Page de connexion ou page principale
+    st.markdown("## Agents et leurs rôles :")
+    st.markdown("""
+    1. **Planificateur de Contenu** : Planifie un contenu engageant et factuellement précis.
+    2. **Rédacteur de Contenu** : Rédige des articles d'opinion perspicaces et factuellement précis.
+    3. **Éditeur** : Édite l'article de blog pour l'aligner avec le style rédactionnel de l'organisation.
+    """)
+
+    st.markdown("## Tâches à effectuer :")
+    st.markdown("""
+    1. **Planification de Contenu** : Prioriser les tendances, identifier le public, développer le plan et inclure des mots-clés SEO.
+    2. **Rédaction** : Utiliser le plan pour rédiger un article de blog convaincant, incorporer des mots-clés SEO et assurer une structure appropriée.
+    3. **Édition** : Relire l'article de blog pour les erreurs grammaticales et l'alignement avec la voix de la marque.
+    """)
+
+# Définir la logique de l'application
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
