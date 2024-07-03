@@ -69,13 +69,13 @@ def show_login_page():
     st.markdown('<h2 class="login-title">Connexion</h2>', unsafe_allow_html=True)
 
     # Champ de nom d'utilisateur
-    username = st.text_input("Username", key="username", className="login-input")
+    username = st.text_input("Username", key="username", placeholder="Entrez votre nom d'utilisateur", label_visibility="collapsed")
     
     # Champ de mot de passe
-    password = st.text_input("Password", type="password", key="password", className="login-input")
+    password = st.text_input("Password", type="password", key="password", placeholder="Entrez votre mot de passe", label_visibility="collapsed")
     
     # Bouton de connexion
-    if st.button("Se connecter", key="login_button"):
+    if st.button("Se connecter", key="login_button", help="Cliquez pour vous connecter", css_class="login-button"):
         if login(username, password):
             st.session_state.logged_in = True
             st.experimental_rerun()
@@ -167,7 +167,7 @@ def show_main_page():
         # Entrée pour le sujet
         topic = st.text_input("Entrez le sujet pour l'article de blog:", "Intelligence Artificielle", key="input-text")
 
-        # Définir les agents
+        # Définir les agents et les tâches
         planner = Agent(
             role="Planificateur de Contenu",
             goal="Planifier un contenu engageant et factuellement précis sur le sujet {topic}",
@@ -200,8 +200,7 @@ def show_main_page():
             description=(
                 "1. Prioriser les dernières tendances, les acteurs clés et les actualités notables sur le sujet {topic}.\n"
                 "2. Identifier le public cible, en tenant compte de ses intérêts et de ses points de douleur.\n"
-                "3. Développer un plan de contenu détaillé comprenant une introduction, des points clés et un appel à l'action.\n"
-                "4. Inclure des mots-clés SEO et des données ou sources pertinentes."
+                "3. Développer un plan de contenu structuré pour un article de blog engageant et informatif."
             ),
             tools=[planner],
         )
