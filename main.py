@@ -38,6 +38,11 @@ def show_login_page():
         }
         .login-input {
             margin-bottom: 1rem;
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
         .login-button {
             background-color: #4CAF50;
@@ -45,6 +50,8 @@ def show_login_page():
             border-radius: 4px;
             padding: 0.5rem;
             font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
         }
         .login-button:hover {
             background-color: #45a049;
@@ -61,11 +68,14 @@ def show_login_page():
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
     st.markdown('<h2 class="login-title">Connexion</h2>', unsafe_allow_html=True)
 
-    username = st.text_input("Username", className="login-input")
-    password = st.text_input("Password", type="password", className="login-input")
-    login_button = st.button("Se connecter", key="login_button", help="Cliquez pour vous connecter", className="login-button")
-
-    if login_button:
+    # Champ de nom d'utilisateur
+    username = st.text_input("Username", key="username", className="login-input")
+    
+    # Champ de mot de passe
+    password = st.text_input("Password", type="password", key="password", className="login-input")
+    
+    # Bouton de connexion
+    if st.button("Se connecter", key="login_button"):
         if login(username, password):
             st.session_state.logged_in = True
             st.experimental_rerun()
@@ -79,7 +89,7 @@ def show_login_page():
 def show_main_page():
     # Configuration de la page
     st.set_page_config(page_title="DIGITAR Blog Post Writer", page_icon="📝", layout="centered")
-    st.title("DIGITAR BLOG POST WRITER")
+    
     st.markdown("""
     <style>
         .stApp {
@@ -116,6 +126,7 @@ def show_main_page():
             font-size: 1rem;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
         }
         .stButton button:hover {
             background-color: #FFC700;
@@ -192,47 +203,46 @@ def show_main_page():
                 "3. Développer un plan de contenu détaillé comprenant une introduction, des points clés et un appel à l'action.\n"
                 "4. Inclure des mots-clés SEO et des données ou sources pertinentes."
             ),
-            expected_output="Un document de plan de contenu complet avec un plan, une analyse du public, des mots-clés SEO et des ressources.",
-            agent=planner
+            tools=[planner],
         )
 
         write = Task(
             description=(
-                "1. Utiliser le plan de contenu pour rédiger un article de blog convaincant sur le sujet {topic}.\n"
-                "2. Incorporer naturellement les mots-clés SEO.\n"
-                "3. Les sections/Sous-titres sont correctement nommés de manière engageante.\n"
-                "4. Écrire un article de blog complet avec une introduction, un corps et une conclusion."
+                "1. Rédiger un article captivant en suivant le plan fourni par le Planificateur de Contenu.\n"
+                "2. Fournir un contenu engageant et informatif, en exprimant des opinions et des arguments clairs.\n"
+                "3. Réviser le texte pour assurer clarté, cohérence et alignement avec les normes rédactionnelles."
             ),
-            expected_output="Un article de blog complet avec introduction, corps et conclusion.",
-            agent=writer
+            tools=[writer],
         )
 
         edit = Task(
             description=(
-                "1. Revoir et affiner l'article de blog fourni par le Rédacteur de Contenu.\n"
-                "2. Assurer l'exactitude des informations, l'engagement du contenu et l'adéquation avec le style de l'organisation.\n"
-                "3. Rechercher des informations supplémentaires si nécessaire pour améliorer le contenu.\n"
-                "4. Éviter les controverses majeures et garantir un ton équilibré."
+                "1. Éditer l'article en termes de style, de ton, et de cohérence avec les directives de l'organisation.\n"
+                "2. Vérifier les faits et corriger les erreurs grammaticales et typographiques.\n"
+                "3. S'assurer que l'article est prêt pour la publication."
             ),
-            expected_output="Une version révisée de l'article de blog prête pour publication.",
-            agent=editor
+            tools=[editor],
         )
 
-        # Affichage des tâches
-        st.header("Planifier, Écrire et Éditer un Article de Blog")
-        st.subheader(f"Sujet : {topic}")
+        # Créer une instance de Crew
+        crew = Crew([plan, write, edit])
 
-        st.write("### Étape 1: Planification")
-        st.write(plan.description.format(topic=topic))
+        if st.button("Démarrer le Workflow", key="start_workflow"):
+            result = crew.run(
+                topic=topic,
+                planner=planner,
+                writer=writer,
+                editor=editor,
+            )
+            st.write(result)
+    else:
+        st.write("Veuillez valider la configuration de l'API et du modèle de langage dans la barre latérale.")
 
-        st.write("### Étape 2: Rédaction")
-        st.write(write.description.format(topic=topic))
-
-        st.write("### Étape 3: Édition")
-        st.write(edit.description.format(topic=topic))
-
-# Vérifiez si l'utilisateur est connecté, sinon afficher la page de connexion
+# Page de connexion ou page principale
 if 'logged_in' not in st.session_state:
-    show_login_page()
-else:
+    st.session_state.logged_in = False
+
+if st.session_state.logged_in:
     show_main_page()
+else:
+    show_login_page()
